@@ -28,7 +28,7 @@ jobs:
 
       - name: Run Bandit SAST
         run: |
-          bandit -r part1/app_secure.py \
+          bandit -r part1/app_vulnerable.py \
             -f json \
             -o bandit_report.json \
             --severity-level medium \
@@ -74,7 +74,7 @@ jobs:
       - name: Check dependencies for CVEs
         run: |
           safety check \
-            -r part1/requirements.txt \
+            -r requirements.txt \
             --json \
             --output safety_report.json || true
           
@@ -114,12 +114,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r part1/requirements.txt
+          pip install -r requirements.txt
           pip install pytest pytest-flask
 
       - name: Run security tests
         run: |
-          cd code/session2
+          cd part2
+          cp ../part1/app_secure.py . 2>/dev/null || true
+          cp -r templates . 2>/dev/null || true
           pytest test_security.py -v \
             --tb=short \
             --junitxml=security_test_results.xml
@@ -187,7 +189,7 @@ jobs:
 
       - name: Start Flask app
         run: |
-          pip install -r part1/requirements.txt
+          pip install -r requirements.txt
           SECRET_KEY=testkey python part1/app_secure.py &
           sleep 3
           curl -f http://127.0.0.1:5001/ || exit 1
